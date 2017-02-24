@@ -149,5 +149,13 @@ namespace Deveel.Web.Client {
 		public static IRequestBuilder Returns<T>(this IRequestBuilder builder) {
 			return builder.Returns(typeof(T));
 		}
+
+		public static IRequestBuilder UseBasicAuthentication(this IRequestBuilder builder, string userName, string password) {
+			return builder.UseAuthenticator(new BasicRequestAuthenticator(userName, password));
+		}
+
+		public static IRequestBuilder UseJwtAuthentication(this IRequestBuilder builder, string token) {
+			return builder.UseAuthenticator(new JwtRequestAuthenticator(token));
+		}
 	}
 }

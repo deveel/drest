@@ -103,7 +103,7 @@ namespace Deveel.Web.Client {
 			} else {
 				var format = Format;
 				if (format == ContentFormat.Default)
-					format = client.Settings.ContentFormat;
+					format = client.Settings.DefaultFormat;
 
 				if (format == ContentFormat.Default)
 					throw new NotSupportedException("Invalid content format setup: the body fallbacks to default that was not set");

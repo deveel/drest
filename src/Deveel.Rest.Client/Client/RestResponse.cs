@@ -55,7 +55,7 @@ namespace Deveel.Web.Client {
 				throw new InvalidOperationException("The request has no return type: cannot extract the body");
 
 			var contentType = Response.Content.Headers.ContentType.MediaType;
-			var serializer = Client.Serializers.FirstOrDefault(x => x.ContentTypes.Any(y => String.Equals(y, contentType, StringComparison.OrdinalIgnoreCase)));
+			var serializer = Client.Settings.Serializers.FirstOrDefault(x => x.ContentTypes.Any(y => String.Equals(y, contentType, StringComparison.OrdinalIgnoreCase)));
 			if (serializer == null)
 				throw new NotSupportedException($"Could not deserialize an result with Content-Type {contentType}");
 

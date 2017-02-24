@@ -5,7 +5,6 @@ namespace Deveel.Web.Client {
 		Default = 0,
 		Json,
 		Xml,
-		KeyValue,
-		Multipart
+		KeyValue
 	}
 }

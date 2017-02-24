@@ -15,6 +15,8 @@ namespace Deveel.Web.Client {
 
 		IRequestBuilder Returns(Type returnType);
 
+		IRequestBuilder UseAuthenticator(IRequestAuthenticator authenticator);
+
 		RestRequest Build();
 	}
 }

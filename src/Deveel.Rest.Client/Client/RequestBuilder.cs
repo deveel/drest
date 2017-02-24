@@ -10,11 +10,10 @@ namespace Deveel.Web.Client {
 		private List<IRequestParameter> parameters;
 		private bool authenticate;
 		private Type returnedType;
-		private ContentFormat contentFormat;
 		private List<HttpFile> files;
+		private IRequestAuthenticator requestAuthenticator;
 
 		public RequestBuilder() {
-			contentFormat = ContentFormat.Default;
 			parameters = new List<IRequestParameter>();
 			files = new List<HttpFile>();
 		}
@@ -92,6 +91,15 @@ namespace Deveel.Web.Client {
 			return this;
 		}
 
+		public IRequestBuilder UseAuthenticator(IRequestAuthenticator authenticator) {
+			if (authenticator == null)
+				throw new ArgumentNullException(nameof(authenticator));
+
+			requestAuthenticator = authenticator;
+			authenticate = true;
+			return this;
+		}
+
 		public RestRequest Build() {
 			if (httpMethod == null)
 				throw new InvalidOperationException("The HTTP method is required");
@@ -100,6 +108,7 @@ namespace Deveel.Web.Client {
 
 			var request = new RestRequest(httpMethod, resourceName) {
 				Authenticate = authenticate,
+				Authenticator = requestAuthenticator,
 				ReturnedType = returnedType
 			};
 

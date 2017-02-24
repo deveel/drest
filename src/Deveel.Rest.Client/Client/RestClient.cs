@@ -1,61 +1,44 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Reflection;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Deveel.Web.Client {
 	public class RestClient : IRestClient {
-		public RestClient(RestClientSettings settings)
-			: this(new HttpClient(), settings) {
+		public RestClient(IRestClientSettings settings)
+			: this(CreateClient(settings), settings) {
 		}
 
-		public RestClient(HttpClient client, RestClientSettings settings) {
+		public RestClient(HttpClient client, IRestClientSettings settings) {
 			if (settings == null)
 				throw new ArgumentNullException(nameof(settings));
 			if (client == null)
 				throw new ArgumentNullException(nameof(client));
 
-			Settings = settings;
-			HttpClient = client;
+			if (settings.BaseUri != null)
+				client.BaseAddress = Settings.BaseUri;
 
-			if (!String.IsNullOrWhiteSpace(Settings.BaseUri))
-				HttpClient.BaseAddress = new Uri(Settings.BaseUri);
-
-			if (HttpClient.BaseAddress == null)
+			if (client.BaseAddress == null)
 				throw new ArgumentException("No base URI was set in the client or the settings");
 
 			if (settings.DefaultHeaders != null) {
 				foreach (var header in settings.DefaultHeaders) {
-					HttpClient.DefaultRequestHeaders.Add(header.Key, WebUtility.UrlEncode(header.Value == null ? "" : header.Value.ToString()));
+					client.DefaultRequestHeaders.Add(header.Key, (header.Value == null ? "" : header.Value.ToString()));
 				}
 			}
 
-			if (!String.IsNullOrWhiteSpace(settings.ClientName) &&
-			    settings.ClientVersion != null) {
-				HttpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue(settings.ClientName, settings.ClientVersion.ToString(3)));
-			}
+			Settings = settings;
+			HttpClient = client;
 		}
 
-		public RestClientSettings Settings { get; }
-
-		IRestClientSettings IRestClient.Settings => Settings;
+		public IRestClientSettings Settings { get; }
 
 		protected HttpClient HttpClient { get; }
 
-		public IRequestAuthenticator Authenticator { get; set; }
-
-		public ICollection<IContentSerializer> Serializers => Settings.Serializers;
-
-		public IContentSerializer JsonSerializer => Serializers.FirstOrDefault(x => x.SupportedFormat == ContentFormat.Json);
-
-		public IContentSerializer XmlSerializer => Serializers.FirstOrDefault(x => x.SupportedFormat == ContentFormat.Xml);
+		private static HttpClient CreateClient(IRestClientSettings settings) {
+			return settings.MessageHandler != null ? new HttpClient(settings.MessageHandler, false) : new HttpClient(); 
+		}
 
 		async Task<IRestResponse> IRestClient.RequestAsync(IRestRequest request, CancellationToken cancellationToken) {
 			return await RequestAsync((RestRequest) request, cancellationToken);
@@ -66,29 +49,33 @@ namespace Deveel.Web.Client {
 				throw new ArgumentNullException(nameof(request));
 
 			if (request.Authenticate) {
-				if (Authenticator == null)
-					throw new AuthenticateException($"The request {request.Method} {request.Resource} required authentication but no authenticator was set");
-
-				Authenticator.AuthenticateRequest(this, request);
+				if (request.Authenticator != null) {
+					request.Authenticator.AuthenticateRequest(this, request);
+				} else if (Settings.Authenticator != null) {
+					Settings.Authenticator.AuthenticateRequest(this, request);
+				} else {
+					throw new AuthenticateException($"The request {request.Method} {request.Resource} requires authentication but no authenticator was set");
+				}
 			}
 
 			var httpRequest = request.AsHttpRequestMessage(this);
 
 			if (Settings.RequestHandlers != null) {
 				foreach (var handler in Settings.RequestHandlers) {
-					await handler.HandleRequestAsync(this, httpRequest);
+					await handler.HandleRequestAsync(this, request);
 				}
 			}
 
 			var httpResponse = await HttpClient.SendAsync(httpRequest, cancellationToken);
+			var response = new RestResponse(this, request, httpResponse);
 
 			if (Settings.ResponseHandlers != null) {
 				foreach (var handler in Settings.ResponseHandlers) {
-					 await handler.HandleResponseAsync(this, httpResponse);
+					 await handler.HandleResponseAsync(this, response);
 				}
 			}
 
-			return new RestResponse(this, request, httpResponse);
+			return response;
 		}
 
 
@@ -107,6 +94,13 @@ namespace Deveel.Web.Client {
 				default:
 					throw new RestResponseException(statusCode, reasonPhrase);
 			}
+		}
+
+		public static RestClient Build(Action<IClientSettingsBuilder> builder) {
+			var settings = new ClientSettingsBuilder();
+			builder(settings);
+
+			return new RestClient(settings.Build());
 		}
 	}
 }

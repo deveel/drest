@@ -19,6 +19,8 @@ namespace Deveel.Web.Client {
 
 		public bool Authenticate { get; set; }
 
+		public IRequestAuthenticator Authenticator { get; set; }
+
 		public string Resource { get; }
 
 		public ICollection<IRequestParameter> Parameters { get; set; }
