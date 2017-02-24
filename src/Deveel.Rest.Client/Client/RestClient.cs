@@ -17,7 +17,7 @@ namespace Deveel.Web.Client {
 				throw new ArgumentNullException(nameof(client));
 
 			if (settings.BaseUri != null)
-				client.BaseAddress = Settings.BaseUri;
+				client.BaseAddress = settings.BaseUri;
 
 			if (client.BaseAddress == null)
 				throw new ArgumentException("No base URI was set in the client or the settings");

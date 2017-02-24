@@ -9,8 +9,6 @@ namespace Deveel.Web.Client {
 
 		IRequestBuilder With(IRequestParameter parameter);
 
-		IRequestBuilder With(HttpFile file);
-
 		IRequestBuilder Authenticate(bool value = true);
 
 		IRequestBuilder Returns(Type returnType);

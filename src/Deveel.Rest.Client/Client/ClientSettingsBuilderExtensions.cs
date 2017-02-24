@@ -15,7 +15,7 @@ namespace Deveel.Web.Client {
 			if (!Uri.TryCreate(baseUri, UriKind.Absolute, out uri))
 				throw new ArgumentException($"The string {baseUri} is not well-formed");
 
-			return builder.BaseUri(baseUri);
+			return builder.BaseUri(uri);
 		}
 
 		public static IClientSettingsBuilder UseXmlSerializer(this IClientSettingsBuilder builder,
@@ -53,6 +53,13 @@ namespace Deveel.Web.Client {
 		public static IClientSettingsBuilder UseSerializer<T>(this IClientSettingsBuilder builder) 
 			where T : class, IContentSerializer {
 			return builder.UseSerializer(typeof(T));
+		}
+
+		public static IClientSettingsBuilder UseDefaultSerializers(this IClientSettingsBuilder builder) {
+			return builder
+				.UseJsonSerializer()
+				.UseXmlSerializer()
+				.UseKeyValueSerializer();
 		}
 
 		public static IClientSettingsBuilder WithHeaders(this IClientSettingsBuilder builder,

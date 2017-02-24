@@ -8,15 +8,15 @@ namespace Deveel.Web.Client {
 			if (String.IsNullOrEmpty(parameterName))
 				throw new ArgumentNullException(nameof(parameterName));
 
-			ParameterType = parameterType;
-			ParameterName = parameterName;
-			ParameterValue = parameterValue;
+			Type = parameterType;
+			Name = parameterName;
+			Value = parameterValue;
 		}
 
-		public RequestParameterType ParameterType { get; }
+		public RequestParameterType Type { get; }
 
-		public string ParameterName { get; }
+		public string Name { get; }
 
-		public object ParameterValue { get; }
+		public object Value { get; }
 	}
 }

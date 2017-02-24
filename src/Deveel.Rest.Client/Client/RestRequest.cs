@@ -27,61 +27,42 @@ namespace Deveel.Web.Client {
 
 		IEnumerable<IRequestParameter> IRestRequest.Parameters => Parameters;
 
-		public bool HasQuery => Parameters != null && Parameters.Any(x => x.ParameterType == RequestParameterType.QueryString);
-
-		public IDictionary<string, object> Query
-			=> Parameters.Where(x => x.ParameterType == RequestParameterType.QueryString)
-				.ToDictionary(x => x.ParameterName, y => y.ParameterValue, StringComparer.OrdinalIgnoreCase);
-
-		public IDictionary<string, object> Route => Parameters.Where(x => x.ParameterType == RequestParameterType.Route)
-			.ToDictionary(x => x.ParameterName, y => y.ParameterValue, StringComparer.OrdinalIgnoreCase);
-
-		public bool HasBody => Parameters != null && Parameters.Any(x => x.ParameterType == RequestParameterType.Body);
-
-		public RequestBodyParameter Body => Parameters.OfType<RequestBodyParameter>().FirstOrDefault();
-
-		public bool HasHeaders => Parameters != null && Parameters.Any(x => x.ParameterType == RequestParameterType.Header);
-
-		public IDictionary<string, object> Headers => Parameters.Where(x => x.ParameterType == RequestParameterType.Header)
-			.ToDictionary(x => x.ParameterName, y => y.ParameterValue, StringComparer.OrdinalIgnoreCase);
-
 		public Type ReturnedType { get; set; }
-
-		private static string MakeQuery(RestRequest request) {
-			var pairs = request.Query.Select(pair => $"{pair.Key}={SafeValue(pair.Value)}");
-			return String.Join("&", pairs);
-		}
 
 		private static string SafeValue(object value) {
 			return value == null ? "" : Convert.ToString(value, CultureInfo.InvariantCulture);
 		}
 
-		private static string MakePath(RestRequest request) {
-			var resource = request.Resource;
-			foreach (var pair in request.Route) {
-				var key = new StringBuilder().Append("{").Append(pair.Key).Append("}").ToString();
-				resource = resource.Replace(key, SafeValue(pair.Value));
+		private static HttpContent MakeFileMultipart(IEnumerable<IRequestParameter> files) {
+			var content = new MultipartFormDataContent();
+
+			foreach (var file in files) {
+				content.Add(file.GetFileContent(true));
 			}
 
-			return resource;
+			return content;
 		}
 
 		internal HttpRequestMessage AsHttpRequestMessage(IRestClient client) {
-			var uriBuilder = new UriBuilder(client.Settings.BaseUri);
-			uriBuilder.Path = MakePath(this);
+			var uri = UriHelper.MakeUri(client.Settings.BaseUri, this);
 
-			if (HasQuery) {
-				uriBuilder.Query = MakeQuery(this);
+			var httpRequest = new HttpRequestMessage(Method, uri);
+
+			if ((Method == HttpMethod.Post || Method == HttpMethod.Put)) {
+				if (this.HasBody()) {
+					httpRequest.Content = this.Body().GetHttpContent(client);
+				} else if (this.HasFiles()) {
+					var files = this.Files().ToList();
+					if (files.Count > 1) {
+						httpRequest.Content = MakeFileMultipart(this.Files());
+					} else {
+						httpRequest.Content = files[0].GetFileContent(false);
+					}
+				}
 			}
 
-			var httpRequest = new HttpRequestMessage(Method, uriBuilder.Uri);
-
-			if ((Method == HttpMethod.Post || Method == HttpMethod.Put) && HasBody) {
-				httpRequest.Content = Body.CreateContent(client);
-			}
-
-			if (HasHeaders) {
-				foreach (var header in Headers) {
+			if (this.HasHeaders()) {
+				foreach (var header in this.Headers()) {
 					httpRequest.Headers.Add(header.Key, SafeValue(header.Value));
 				}
 			}
@@ -117,7 +98,7 @@ namespace Deveel.Web.Client {
 				.Returns<T>());
 		}
 
-		public static RestRequest PostFile(string resource, HttpFile file, object routes = null, object query = null) {
+		public static RestRequest PostFile(string resource, RequestFile file, object routes = null, object query = null) {
 			return Build(builder => builder
 				.Post()
 				.To(resource)

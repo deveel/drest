@@ -5,6 +5,7 @@ namespace Deveel.Web.Client {
 		Header,
 		QueryString,
 		Route,
-		Body
+		Body,
+		File
 	}
 }

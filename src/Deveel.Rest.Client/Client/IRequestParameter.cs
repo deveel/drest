@@ -2,10 +2,10 @@
 
 namespace Deveel.Web.Client {
 	public interface IRequestParameter {
-		RequestParameterType ParameterType { get; }
+		RequestParameterType Type { get; }
 
-		string ParameterName { get; }
+		string Name { get; }
 
-		object ParameterValue { get; }
+		object Value { get; }
 	}
 }

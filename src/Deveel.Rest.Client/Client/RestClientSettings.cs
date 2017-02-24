@@ -2,9 +2,6 @@
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Reflection;
-using System.Xml;
-
-using Newtonsoft.Json;
 
 namespace Deveel.Web.Client {
 	public class RestClientSettings : IRestClientSettings {
@@ -14,6 +11,7 @@ namespace Deveel.Web.Client {
 			DefaultHeaders = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 			RequestHandlers = new List<IRequestHandler>();
 			ResponseHandlers = new List<IRestResponseHandler>();
+			Serializers = new List<IContentSerializer>();
 		}
 
 		public Uri BaseUri { get; set; }

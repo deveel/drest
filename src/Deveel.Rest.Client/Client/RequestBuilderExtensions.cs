@@ -76,7 +76,7 @@ namespace Deveel.Web.Client {
 		public static IRequestBuilder With(this IRequestBuilder builder, RequestParameterType type, string name, object value) {
 			IRequestParameter parameter;
 			if (type == RequestParameterType.Body) {
-				parameter = new RequestBodyParameter(name, value);
+				parameter = new RequestBody(name, value);
 			} else {
 				if (String.IsNullOrEmpty(name))
 					throw new ArgumentNullException(nameof(name));
@@ -144,6 +144,25 @@ namespace Deveel.Web.Client {
 
 		public static IRequestBuilder WithBody(this IRequestBuilder builder, object value) {
 			return builder.WithBody(null, value);
+		}
+
+		public static IRequestBuilder WithBody(this IRequestBuilder builder, IRequestBody body) {
+			return builder.With(body);
+		}
+
+		public static IRequestBuilder WithBody(this IRequestBuilder builder, Action<IRequestBodyBuilder> body) {
+			var bodyBuilder = new RequestBodyBuilder();
+			body(bodyBuilder);
+
+			return builder.WithBody(bodyBuilder.Build());
+		}
+
+		public static IRequestBuilder WithJsonBody(this IRequestBuilder builder, object value) {
+			return builder.WithBody(body => body.WithJsonContent(value));
+		}
+
+		public static IRequestBuilder WithXmlBody(this IRequestBuilder builder, object value) {
+			return builder.WithBody(body => body.WithXmlContent(value));
 		}
 
 		public static IRequestBuilder Returns<T>(this IRequestBuilder builder) {

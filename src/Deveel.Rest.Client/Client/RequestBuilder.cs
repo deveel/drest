@@ -10,12 +10,10 @@ namespace Deveel.Web.Client {
 		private List<IRequestParameter> parameters;
 		private bool authenticate;
 		private Type returnedType;
-		private List<HttpFile> files;
 		private IRequestAuthenticator requestAuthenticator;
 
 		public RequestBuilder() {
 			parameters = new List<IRequestParameter>();
-			files = new List<HttpFile>();
 		}
 
 		public IRequestBuilder Method(HttpMethod method) {
@@ -34,50 +32,21 @@ namespace Deveel.Web.Client {
 			return this;
 		}
 
-		private void AddBody(IRequestParameter parameter) {
-			var body = parameters.FirstOrDefault(x => x.ParameterType == RequestParameterType.Body);
-			if (body == null) {
-				parameters.Add(parameter);
-			} else {
-				if (!(body is IMultipartBodyParameter))
-					throw new NotSupportedException("The parent body is not multiparted");
-				if (!(parameter is RequestBodyParameter))
-					throw new ArgumentException("The input is not a valid body part");
-
-				((IMultipartBodyParameter)body).AddPart((RequestBodyParameter) parameter);
-			}
-		}
-
-		private void AddFile(HttpFile file) {
-			var body = parameters.FirstOrDefault(x => x.ParameterType == RequestParameterType.Body);
-			if (body == null) {
-				files.Add(file);
-			} else if (!(body is IMultipartBodyParameter)) {
-				throw new NotSupportedException("The parent body is not multiparted");
-			} else {
-				((IMultipartBodyParameter)body).AddFile(file);
-			}
-		}
-
 		public IRequestBuilder With(IRequestParameter parameter) {
 			if (parameter == null)
 				throw new ArgumentNullException(nameof(parameter));
 
-			if (parameters.Any(x => x.ParameterName == parameter.ParameterName &&
-			                        x.ParameterType == parameter.ParameterType))
-				throw new ArgumentException($"The parameter {parameter.ParameterName} of type {parameter.ParameterType} already set");
+			if (parameters.Any(x => x.Name == parameter.Name &&
+			                        x.Type == parameter.Type))
+				throw new ArgumentException($"The parameter {parameter.Name} of type {parameter.Type} already set");
 
-			if (parameter.ParameterType == RequestParameterType.Body) {
-				AddBody(parameter);
+			if (parameter.IsBody()) {
+				if (parameters.Any(x => x.IsBody()))
+					throw new ArgumentException();
 			} else {
 				parameters.Add(parameter);
 			}
 
-			return this;
-		}
-
-		public IRequestBuilder With(HttpFile file) {
-			AddFile(file);
 			return this;
 		}
 
@@ -112,26 +81,38 @@ namespace Deveel.Web.Client {
 				ReturnedType = returnedType
 			};
 
-			foreach (var parameter in parameters.Where(x => x.ParameterType != RequestParameterType.Body)) {
+			var simpleParams = parameters.Where(x => !x.IsBody() && !x.IsFile());
+			foreach (var parameter in simpleParams) {
 				request.Parameters.Add(parameter);
 			}
 
-			var body = parameters.FirstOrDefault(x => x.ParameterType == RequestParameterType.Body);
-			if (files.Count > 0) {
-				if (body == null) {
-					body = new RequestBodyParameter();
-				}
+			var body = parameters.FirstOrDefault(x => x.IsBody());
+			var files = parameters.Where(x => x.IsFile()).ToList();
 
-				if (!(body is IMultipartBodyParameter))
+			if (files.Count > 1) {
+				if (body == null)
+					body = new RequestBody();
+
+				if (!(body is IMultipartBody))
 					throw new NotSupportedException("A body was found but is not multi-partable");
 
 				foreach (var file in files) {
-					((IMultipartBodyParameter)body).AddFile(file);
+					var filePart = file as IBodyPart;
+					if (filePart == null)
+						throw new InvalidOperationException("The file is not body part");
+
+					((IMultipartBody)body).AddPart(filePart);
 				}
+			} else if (files.Count == 1) {
+				request.Parameters.Add(files[0]);
 			}
 
-			if (body != null)
+			if (body != null) {
+				if (files.Count == 1)
+					throw new InvalidOperationException("A body was specified in a request that has a file already");
+
 				request.Parameters.Add(body);
+			}
 
 			return request;
 		}
