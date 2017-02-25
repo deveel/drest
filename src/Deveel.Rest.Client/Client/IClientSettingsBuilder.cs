@@ -25,6 +25,8 @@ namespace Deveel.Web.Client {
 
 		IClientSettingsBuilder UseAuthenticator(IRequestAuthenticator authenticator);
 
+		IClientSettingsBuilder AuthenticateRequests(bool value = true);
+
 		IRestClientSettings Build(IBuildContext context);
 	}
 }

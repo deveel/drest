@@ -41,5 +41,7 @@ namespace Deveel.Web.Client {
 		public HttpMessageHandler MessageHandler { get; set; }
 
 		public IRequestAuthenticator Authenticator { get; set; }
+
+		public bool AuthenticateRequests { get; set; }
 	}
 }

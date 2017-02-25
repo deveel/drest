@@ -50,7 +50,11 @@ namespace Deveel.Web.Client {
 			if (request == null)
 				throw new ArgumentNullException(nameof(request));
 
-			if (request.Authenticate) {
+			var authenticate = Settings.AuthenticateRequests;
+			if (request.Authenticate != null)
+				authenticate = request.Authenticate.Value;
+
+			if (authenticate) {
 				if (request.Authenticator != null) {
 					request.Authenticator.AuthenticateRequest(this, request);
 				} else if (Settings.Authenticator != null) {

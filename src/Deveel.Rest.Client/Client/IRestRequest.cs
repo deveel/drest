@@ -10,7 +10,7 @@ namespace Deveel.Web.Client {
 
 		IEnumerable<IRequestParameter> Parameters { get; }
 
-		bool Authenticate { get; }
+		bool? Authenticate { get; }
 
 		Type ReturnedType { get; }
 

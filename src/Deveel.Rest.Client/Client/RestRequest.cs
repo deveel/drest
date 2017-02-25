@@ -17,7 +17,7 @@ namespace Deveel.Web.Client {
 
 		public HttpMethod Method { get; }
 
-		public bool Authenticate { get; set; }
+		public bool? Authenticate { get; set; }
 
 		public IRequestAuthenticator Authenticator { get; set; }
 

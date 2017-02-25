@@ -8,7 +8,7 @@ namespace Deveel.Web.Client {
 		private HttpMethod httpMethod;
 		private string resourceName;
 		private List<IRequestParameter> parameters;
-		private bool authenticate;
+		private bool? authenticate;
 		private Type returnedType;
 		private IRequestAuthenticator requestAuthenticator;
 

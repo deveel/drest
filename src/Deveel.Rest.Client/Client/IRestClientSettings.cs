@@ -18,6 +18,8 @@ namespace Deveel.Web.Client {
 
 		IRequestAuthenticator Authenticator { get; set; }
 
+		bool AuthenticateRequests { get; set; }
+
 		Uri BaseUri { get; set; }
 	}
 }

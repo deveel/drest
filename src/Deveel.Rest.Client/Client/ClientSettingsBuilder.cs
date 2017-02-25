@@ -13,6 +13,7 @@ namespace Deveel.Web.Client {
 		private Dictionary<string, object> defaultHeaders;
 		private ContentFormat defaultFormat;
 		private IRequestAuthenticator requestAuthenticator;
+		private bool? authenticate;
 
 		public IClientSettingsBuilder BaseUri(Uri baseUri) {
 			if (baseUri == null)
@@ -108,6 +109,11 @@ namespace Deveel.Web.Client {
 			return this;
 		}
 
+		public IClientSettingsBuilder AuthenticateRequests(bool value = true) {
+			authenticate = value;
+			return this;
+		}
+
 		public IClientSettingsBuilder UseMessageHandler(HttpMessageHandler handler) {
 			messageHandler = handler;
 			return this;
@@ -140,6 +146,7 @@ namespace Deveel.Web.Client {
 				BaseUri = serviceBaseUri,
 				MessageHandler = messageHandler,
 				Authenticator = requestAuthenticator,
+				AuthenticateRequests = authenticate ?? requestAuthenticator != null,
 				DefaultFormat = defaultFormat == ContentFormat.Default ? ContentFormat.Json : defaultFormat
 			};
 
