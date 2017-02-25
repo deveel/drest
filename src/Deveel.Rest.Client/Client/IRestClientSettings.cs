@@ -6,7 +6,7 @@ namespace Deveel.Web.Client {
 	public interface IRestClientSettings {
 		IEnumerable<IContentSerializer> Serializers { get; }
 
-		ContentFormat DefaultFormat { get; }
+		ContentFormat DefaultFormat { get; set; }
 
 		IEnumerable<KeyValuePair<string, object>> DefaultHeaders { get; }
 
@@ -16,8 +16,8 @@ namespace Deveel.Web.Client {
 
 		IEnumerable<IRestResponseHandler> ResponseHandlers { get; }
 
-		IRequestAuthenticator Authenticator { get; }
+		IRequestAuthenticator Authenticator { get; set; }
 
-		Uri BaseUri { get; }
+		Uri BaseUri { get; set; }
 	}
 }

@@ -16,11 +16,13 @@ namespace Deveel.Web.Client {
 			if (client == null)
 				throw new ArgumentNullException(nameof(client));
 
-			if (settings.BaseUri != null)
+			if (settings.BaseUri != null) {
 				client.BaseAddress = settings.BaseUri;
-
-			if (client.BaseAddress == null)
-				throw new ArgumentException("No base URI was set in the client or the settings");
+			} else if (client.BaseAddress != null) {
+				settings.BaseUri = client.BaseAddress;
+			} else {
+				throw new ArgumentException("A base URI is required.");
+			}
 
 			if (settings.DefaultHeaders != null) {
 				foreach (var header in settings.DefaultHeaders) {
