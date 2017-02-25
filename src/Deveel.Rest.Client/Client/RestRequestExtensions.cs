@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 
 namespace Deveel.Web.Client {
 	public static class RestRequestExtensions {
@@ -167,7 +168,19 @@ namespace Deveel.Web.Client {
 			}
 
 			if (request.ReturnedType != null) {
-				// TODO: allow specifying a desired return type to pass the Accept-Encoding header
+				var contentFormat = request.ReturnedFormat;
+				if (contentFormat == ContentFormat.Default)
+					contentFormat = client.Settings.DefaultFormat;
+
+				var serializer = client.Settings.Serializer(contentFormat);
+				if (serializer == null)
+					throw new InvalidOperationException($"No serializer was configured to handle the format {contentFormat} required.");
+
+				var contentTypes = serializer.ContentTypes;
+
+				foreach (var contentType in contentTypes) {
+					httpRequest.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse(contentType));
+				}
 			}
 
 			return httpRequest;

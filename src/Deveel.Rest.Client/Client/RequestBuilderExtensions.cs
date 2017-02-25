@@ -179,12 +179,44 @@ namespace Deveel.Web.Client {
 			return builder.Returns(typeof(T));
 		}
 
+		public static IRequestBuilder ReturnsDefaultFormat(this IRequestBuilder builder) {
+			return builder.ReturnsFormat(ContentFormat.Default);
+		}
+
+		public static IRequestBuilder ReturnsJson(this IRequestBuilder builder) {
+			return builder.ReturnsFormat(ContentFormat.Json);
+		}
+
+		public static IRequestBuilder ReturnsXml(this IRequestBuilder builder) {
+			return builder.ReturnsFormat(ContentFormat.Xml);
+		}
+
+		public static IRequestBuilder ReturnsJson(this IRequestBuilder builder, Type returnType) {
+			return builder.Returns(returnType).ReturnsFormat(ContentFormat.Json);
+		}
+
+		public static IRequestBuilder ReturnsJson<T>(this IRequestBuilder builder) {
+			return builder.ReturnsJson(typeof(T));
+		}
+
+		public static IRequestBuilder ReturnsXml(this IRequestBuilder builder, Type returnType) {
+			return builder.Returns(returnType).ReturnsFormat(ContentFormat.Xml);
+		}
+
+		public static IRequestBuilder ReturnsXml<T>(this IRequestBuilder builder) {
+			return builder.ReturnsXml(typeof(T));
+		}
+
 		public static IRequestBuilder UseBasicAuthentication(this IRequestBuilder builder, string userName, string password) {
 			return builder.UseAuthenticator(new BasicRequestAuthenticator(userName, password));
 		}
 
 		public static IRequestBuilder UseJwtAuthentication(this IRequestBuilder builder, string token) {
 			return builder.UseAuthenticator(new JwtRequestAuthenticator(token));
+		}
+
+		public static IRequestBuilder Anonymous(this IRequestBuilder builder) {
+			return builder.UseAuthenticator(null).Authenticate(false);
 		}
 	}
 }

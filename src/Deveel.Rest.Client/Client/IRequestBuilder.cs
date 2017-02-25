@@ -13,6 +13,8 @@ namespace Deveel.Web.Client {
 
 		IRequestBuilder Returns(Type returnType);
 
+		IRequestBuilder ReturnsFormat(ContentFormat format);
+
 		IRequestBuilder UseAuthenticator(IRequestAuthenticator authenticator);
 
 		RestRequest Build();

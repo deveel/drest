@@ -12,7 +12,7 @@ namespace Deveel.Web.Client {
 			Resource = resource;
 			Parameters = new List<IRequestParameter>();
 
-			Authenticate = true;
+			ReturnedFormat = ContentFormat.Default;
 		}
 
 		public HttpMethod Method { get; }
@@ -28,6 +28,8 @@ namespace Deveel.Web.Client {
 		IEnumerable<IRequestParameter> IRestRequest.Parameters => Parameters;
 
 		public Type ReturnedType { get; set; }
+
+		public ContentFormat ReturnedFormat { get; set; }
 
 		public static RestRequest Get<T>(string resource, object routes = null, object query = null) {
 			return Build(builder => builder

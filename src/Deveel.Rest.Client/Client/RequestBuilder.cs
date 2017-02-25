@@ -10,10 +10,12 @@ namespace Deveel.Web.Client {
 		private List<IRequestParameter> parameters;
 		private bool? authenticate;
 		private Type returnedType;
+		private ContentFormat returnedFormat;
 		private IRequestAuthenticator requestAuthenticator;
 
 		public RequestBuilder() {
 			parameters = new List<IRequestParameter>();
+			returnedFormat = ContentFormat.Default;
 		}
 
 		public IRequestBuilder Method(HttpMethod method) {
@@ -59,10 +61,12 @@ namespace Deveel.Web.Client {
 			return this;
 		}
 
-		public IRequestBuilder UseAuthenticator(IRequestAuthenticator authenticator) {
-			if (authenticator == null)
-				throw new ArgumentNullException(nameof(authenticator));
+		public IRequestBuilder ReturnsFormat(ContentFormat format) {
+			returnedFormat = format;
+			return this;
+		}
 
+		public IRequestBuilder UseAuthenticator(IRequestAuthenticator authenticator) {
 			requestAuthenticator = authenticator;
 			authenticate = true;
 			return this;
