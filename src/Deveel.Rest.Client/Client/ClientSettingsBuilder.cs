@@ -152,6 +152,8 @@ namespace Deveel.Web.Client {
 
 		private void AddSerializers(RestClientSettings settings, IBuildContext context) {
 			if (serializers != null) {
+				settings.Serializers.Clear();
+
 				foreach (var handler in serializers) {
 					var requestHandler = handler.Instance as IContentSerializer;
 					if (handler.Type != null)

@@ -11,7 +11,11 @@ namespace Deveel.Web.Client {
 			DefaultHeaders = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 			RequestHandlers = new List<IRequestHandler>();
 			ResponseHandlers = new List<IRestResponseHandler>();
-			Serializers = new List<IContentSerializer>();
+			Serializers = new List<IContentSerializer> {
+				new JsonContentSerializer(),
+				new KeyValueContentSerializer(),
+				new XmlContentSerializer()
+			};
 		}
 
 		public Uri BaseUri { get; set; }

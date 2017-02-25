@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 
@@ -77,6 +78,11 @@ namespace Deveel.Web.Client {
 			IRequestParameter parameter;
 			if (type == RequestParameterType.Body) {
 				parameter = new RequestBody(name, value);
+			} else if (type == RequestParameterType.File) {
+				if (!(value is Stream))
+					throw new ArgumentException();
+
+				parameter = new RequestFile(name, name, (Stream)value);
 			} else {
 				if (String.IsNullOrEmpty(name))
 					throw new ArgumentNullException(nameof(name));
@@ -163,6 +169,10 @@ namespace Deveel.Web.Client {
 
 		public static IRequestBuilder WithXmlBody(this IRequestBuilder builder, object value) {
 			return builder.WithBody(body => body.WithXmlContent(value));
+		}
+
+		public static IRequestBuilder WithFile(this IRequestBuilder builder, IRequestFile file) {
+			return builder.With(file);
 		}
 
 		public static IRequestBuilder Returns<T>(this IRequestBuilder builder) {
