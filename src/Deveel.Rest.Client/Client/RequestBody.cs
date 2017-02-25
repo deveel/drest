@@ -118,15 +118,18 @@ namespace Deveel.Web.Client {
 			var multipart = new MultipartFormDataContent();
 
 			foreach (var bodyPart in body.Parts) {
+				var parameter = bodyPart.Value;
+
 				HttpContent content;
 
-				if (bodyPart.Value.IsFile()) {
-					content = bodyPart.Value.GetFileContent(true);
+				string fileName = null;
+				if (parameter.IsFile()) {
+					fileName = parameter.FileName();
+					content = parameter.GetFileContent(true);
 				} else {
 					content = bodyPart.Value.GetHttpContent(client);
 				}
 
-				var fileName = bodyPart.Value.FileName();
 				multipart.Add(content, bodyPart.Value.Name, fileName);
 			}
 
