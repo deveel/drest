@@ -21,7 +21,7 @@ namespace Deveel.Web.Client {
 				.GetTypeInfo()
 				.GetProperties(BindingFlags.Instance | BindingFlags.Public)
 				.ToDictionary(prop => prop.Name, prop => prop.GetValue(obj, null))
-				.Select(x => $"{x.Key}={SafeValue(x)}");
+				.Select(x => $"{x.Key}={SafeValue(x.Value)}");
 
 			return String.Join("&", values);
 		}
