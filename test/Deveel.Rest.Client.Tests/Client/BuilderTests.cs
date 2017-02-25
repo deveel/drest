@@ -114,5 +114,16 @@ namespace Deveel.Web.Client {
 			Assert.IsNotNull(message);
 			Assert.AreEqual("http://example.com/api/foo", message.RequestUri.ToString());
 		}
+
+		[Test]
+		public void DeleteWithQuery() {
+			var request = RestRequest.Build(builder => builder.Delete().To("user").WithQueryStrings(new {id = 22}));
+
+			Assert.IsNotNull(request);
+			Assert.AreEqual(HttpMethod.Delete, request.Method);
+			Assert.IsNotNull(request.Parameters);
+			Assert.IsTrue(request.HasQueryString());
+			Assert.IsTrue(request.HasQueryStringPair("id"));
+		}
 	}
 }

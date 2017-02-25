@@ -51,7 +51,11 @@ namespace Deveel.Web.Client {
 			return request.HasParameters(RequestParameterType.QueryString);
 		}
 
-		public static void AddQueryString(this IRestRequest request, string key, object value) {
+		public static bool HasQueryStringPair(this IRestRequest request, string key) {
+			return request.HasParameter(RequestParameterType.QueryString, key);
+		}
+
+		public static void AddQueryStringPair(this IRestRequest request, string key, object value) {
 			request.AddParameter(RequestParameterType.QueryString, key, value);
 		}
 
@@ -140,16 +144,20 @@ namespace Deveel.Web.Client {
 
 			if (request.Method == HttpMethod.Post || 
 				request.Method == HttpMethod.Put) {
+				HttpContent content = null;
+
 				if (request.HasBody()) {
-					httpRequest.Content = request.Body().GetHttpContent(client);
+					content = request.Body().GetHttpContent(client);
 				} else if (request.HasFiles()) {
 					var files = request.Files().ToList();
 					if (files.Count > 1) {
-						httpRequest.Content = MakeFileMultipart(request.Files());
+						content = MakeFileMultipart(request.Files());
 					} else {
-						httpRequest.Content = files[0].GetFileContent(false);
+						content = files[0].GetFileContent(false);
 					}
 				}
+
+				httpRequest.Content = content;
 			}
 
 			if (request.HasHeaders()) {
@@ -158,8 +166,15 @@ namespace Deveel.Web.Client {
 				}
 			}
 
+			if (request.ReturnedType != null) {
+				// TODO: allow specifying a desired return type to pass the Accept-Encoding header
+			}
+
 			return httpRequest;
 		}
 
+		public static string ToHttpString(this IRestRequest request, IRestClient client) {
+			return request.ToString(new HttpRequestFormatter(client));
+		}
 	}
 }

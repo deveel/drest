@@ -36,7 +36,12 @@ namespace Deveel.Web.Client {
 		}
 
 		private static string MakeQueryString(IDictionary<string, object> query) {
-			return WebUtility.UrlEncode(String.Join("&", query.Select(x => $"{x.Key}={x.Value}")));
+			return String.Join("&", query.Select(x => $"{x.Key}={UrlEncoded(x.Value)}"));
+		}
+
+		private static string UrlEncoded(object value) {
+			var s = value == null ? "" : Convert.ToString(value, CultureInfo.InvariantCulture);
+			return WebUtility.UrlEncode(s);
 		}
 
 		private static string MakePath(string path, string resource) {

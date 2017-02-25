@@ -108,5 +108,17 @@ namespace Deveel.Web.Client {
 
 			return new RestClient(settings.Build());
 		}
+
+		public static RestClient Build(Uri baseUri) {
+			return Build(builder => builder.BaseUri(baseUri));
+		}
+
+		public static RestClient Build(string baseUri) {
+			Uri uri;
+			if (!Uri.TryCreate(baseUri, UriKind.Absolute, out uri))
+				throw new ArgumentException("Invalid base URI");
+
+			return Build(uri);
+		}
 	}
 }
