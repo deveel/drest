@@ -25,6 +25,13 @@ namespace Deveel.Web.Client {
 			return parameter.Type == RequestParameterType.File;
 		}
 
+		public static string FileName(this IRequestParameter parameter) {
+			if (parameter is IRequestFile)
+				return ((IRequestFile) parameter).FileName;
+
+			return $"{parameter.Name}.file";
+		}
+
 		internal static HttpContent GetHttpContent(this IRequestParameter parameter, IRestClient client) {
 			return RequestBody.CreateContent(parameter, client);
 		}

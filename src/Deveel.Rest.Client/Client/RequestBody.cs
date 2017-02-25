@@ -126,7 +126,8 @@ namespace Deveel.Web.Client {
 					content = bodyPart.Value.GetHttpContent(client);
 				}
 
-				multipart.Add(content);
+				var fileName = bodyPart.Value.FileName();
+				multipart.Add(content, bodyPart.Value.Name, fileName);
 			}
 
 			return multipart;

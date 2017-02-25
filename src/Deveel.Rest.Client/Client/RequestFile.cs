@@ -42,15 +42,12 @@ namespace Deveel.Web.Client {
 
 			content.Headers.ContentLength = file.Content.Length;
 
-			if (!String.IsNullOrEmpty(file.FileName))
-				content.Headers.ContentDisposition.FileName = file.FileName;
-
 			if (!String.IsNullOrEmpty(file.ContentType))
 				content.Headers.ContentType = MediaTypeHeaderValue.Parse(file.ContentType);
 
 			if (!inMultipart) {
 				var multipart = new MultipartFormDataContent();
-				multipart.Add(content);
+				multipart.Add(content, file.Name, file.FileName);
 				content = multipart;
 			}
 
@@ -67,10 +64,11 @@ namespace Deveel.Web.Client {
 
 			HttpContent content = new StreamContent(stream, 2048);
 
-			if (!inMultipart)
-				content = new MultipartFormDataContent {
-					{content,parameter.Name }
-				};
+			if (!inMultipart) {
+				var multipart = new MultipartFormDataContent();
+				multipart.Add(content, parameter.Name, parameter.Name);
+				content = multipart;
+			}
 
 			return content;
 		}

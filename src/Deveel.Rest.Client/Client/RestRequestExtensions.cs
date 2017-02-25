@@ -132,7 +132,8 @@ namespace Deveel.Web.Client {
 			var content = new MultipartFormDataContent();
 
 			foreach (var file in files) {
-				content.Add(file.GetFileContent(true));
+				var fileName = file.FileName();
+				content.Add(file.GetFileContent(true), file.Name, fileName);
 			}
 
 			return content;
