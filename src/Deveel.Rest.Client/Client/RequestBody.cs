@@ -127,10 +127,14 @@ namespace Deveel.Web.Client {
 					fileName = parameter.FileName();
 					content = parameter.GetFileContent(true);
 				} else {
-					content = bodyPart.Value.GetHttpContent(client);
+					content = parameter.GetHttpContent(client);
 				}
 
-				multipart.Add(content, bodyPart.Value.Name, fileName);
+				if (!String.IsNullOrEmpty(fileName)) {
+					multipart.Add(content, parameter.Name, fileName);
+				} else {
+					multipart.Add(content, parameter.Name);
+				}
 			}
 
 			return multipart;
