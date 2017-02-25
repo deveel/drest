@@ -40,13 +40,18 @@ namespace Deveel.Web.Client {
 		internal static HttpContent CreateFileContent(IRequestFile file, bool inMultipart = false) {
 			HttpContent content = new StreamContent(file.Content, file.BufferSize);
 
+			content.Headers.ContentLength = file.Content.Length;
+
+			if (!String.IsNullOrEmpty(file.FileName))
+				content.Headers.ContentDisposition.FileName = file.FileName;
+
 			if (!String.IsNullOrEmpty(file.ContentType))
 				content.Headers.ContentType = MediaTypeHeaderValue.Parse(file.ContentType);
 
 			if (!inMultipart) {
-				content = new MultipartFormDataContent {
-					{content, file.Name, file.FileName}
-				};
+				var multipart = new MultipartFormDataContent();
+				multipart.Add(content);
+				content = multipart;
 			}
 
 			return content;
