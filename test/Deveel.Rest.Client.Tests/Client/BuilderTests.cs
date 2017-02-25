@@ -55,6 +55,7 @@ namespace Deveel.Web.Client {
 			Assert.AreEqual(HttpMethod.Post, request.Method);
 			Assert.AreEqual("foo", request.Resource);
 			Assert.IsNotNull(request.Parameters);
+			Assert.IsNotEmpty(request.Parameters);
 			Assert.IsTrue(request.HasBody());
 			Assert.IsTrue(request.Body().IsSimpleValue());
 			Assert.IsInstanceOf<RequestBody>(request.Body());

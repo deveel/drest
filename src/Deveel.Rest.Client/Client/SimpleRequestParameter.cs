@@ -2,15 +2,15 @@
 
 namespace Deveel.Web.Client {
 	public sealed class SimpleRequestParameter : IRequestParameter {
-		public SimpleRequestParameter(RequestParameterType parameterType, string parameterName, object parameterValue) {
-			if (parameterType == RequestParameterType.Body)
+		public SimpleRequestParameter(RequestParameterType type, string name, object value) {
+			if (type == RequestParameterType.Body)
 				throw new ArgumentException();
-			if (String.IsNullOrEmpty(parameterName))
-				throw new ArgumentNullException(nameof(parameterName));
+			if (String.IsNullOrEmpty(name))
+				throw new ArgumentNullException(nameof(name));
 
-			Type = parameterType;
-			Name = parameterName;
-			Value = parameterValue;
+			Type = type;
+			Name = name;
+			Value = value;
 		}
 
 		public RequestParameterType Type { get; }

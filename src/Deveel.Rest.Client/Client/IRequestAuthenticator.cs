@@ -2,6 +2,6 @@
 
 namespace Deveel.Web.Client {
 	public interface IRequestAuthenticator {
-		void AuthenticateRequest(RestClient client, RestRequest request);
+		void AuthenticateRequest(IRestClient client, IRestRequest request);
 	}
 }

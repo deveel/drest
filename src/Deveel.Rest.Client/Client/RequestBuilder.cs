@@ -107,10 +107,14 @@ namespace Deveel.Web.Client {
 			}
 
 			if (body != null) {
-				if (files.Count == 1)
-					throw new InvalidOperationException("A body was specified in a request that has a file already");
-
-				request.Parameters.Add(body);
+				if (files.Count == 1) {
+					var multipart = new RequestBody();
+					multipart.AddPart(body as IBodyPart);
+					multipart.AddPart(files[0] as IBodyPart);
+					request.Parameters.Add(multipart);
+				} else {
+					request.Parameters.Add(body);
+				}
 			}
 
 			return request;

@@ -16,9 +16,9 @@ namespace Deveel.Web.Client {
 
 		public string Password { get; }
 
-		void IRequestAuthenticator.AuthenticateRequest(RestClient client, RestRequest request) {
-			if (!request.Headers().ContainsKey("Authorization"))
-				request.Parameters.Add(new SimpleRequestParameter(RequestParameterType.Header, "Authorization", $"Basic {token}"));
+		void IRequestAuthenticator.AuthenticateRequest(IRestClient client, IRestRequest request) {
+			if (!request.HasHeader("Authorization"))
+				request.AddHeader("Authorization", $"Basic {token}");
 		}
 	}
 }

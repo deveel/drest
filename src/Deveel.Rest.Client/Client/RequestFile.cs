@@ -5,7 +5,11 @@ using System.Net.Http.Headers;
 
 namespace Deveel.Web.Client {
 	public class RequestFile : IRequestFile {
-		public RequestFile(string name, string fileName, Stream content) {
+		public RequestFile(string name, string fileName, Stream content) 
+			: this(name, fileName, null, content) {
+		}
+
+		public RequestFile(string name, string fileName, string contentType, Stream content) {
 			if (content == null)
 				throw new ArgumentNullException(nameof(content));
 			if (String.IsNullOrEmpty(name))
@@ -16,6 +20,7 @@ namespace Deveel.Web.Client {
 			Name = name;
 			FileName = fileName;
 			Content = content;
+			ContentType = contentType;
 		}
 
 		RequestParameterType IRequestParameter.Type => RequestParameterType.File;
