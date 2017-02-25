@@ -84,8 +84,7 @@ namespace Deveel.Web.Client {
 			var request = RestRequest.Build(builder => builder
 				.Post()
 				.To("foo")
-				.WithBody(body => body
-					.WithJsonContent(new {a = 22, b = "hey"}))
+				.WithJsonBody(new {a = 22, b = "hey"})
 				.Returns<dynamic>());
 
 			Assert.IsNotNull(request);
@@ -98,6 +97,21 @@ namespace Deveel.Web.Client {
 			Assert.IsInstanceOf<RequestBody>(request.Body());
 			Assert.AreEqual(ContentFormat.Json, ((RequestBody)request.Body()).Format);
 			Assert.IsInstanceOf<dynamic>(request.Body().Value);
+		}
+
+		[Test]
+		public void ClientBuildAndRequest() {
+			var client = RestClient.Build(settings => settings.BaseUri("http://example.com/api").UseDefaultSerializers());
+			var request = RestRequest.Build(builder => builder
+				.Post()
+				.To("foo")
+				.WithJsonBody(new {a = 22, b = "hey"})
+				.Returns<dynamic>());
+
+			var message = request.AsHttpRequestMessage(client);
+
+			Assert.IsNotNull(message);
+			Assert.AreEqual("http://example.com/api/foo", message.RequestUri.ToString());
 		}
 	}
 }

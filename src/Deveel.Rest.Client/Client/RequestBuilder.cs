@@ -43,10 +43,9 @@ namespace Deveel.Web.Client {
 			if (parameter.IsBody()) {
 				if (parameters.Any(x => x.IsBody()))
 					throw new ArgumentException();
-			} else {
-				parameters.Add(parameter);
 			}
 
+			parameters.Add(parameter);
 			return this;
 		}
 

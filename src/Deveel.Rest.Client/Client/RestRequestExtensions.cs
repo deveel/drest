@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Net.Http;
 
 namespace Deveel.Web.Client {
 	public static class RestRequestExtensions {
@@ -59,5 +61,48 @@ namespace Deveel.Web.Client {
 		public static string ToString(this IRestRequest request, IRequestFormatter formatter) {
 			return formatter.Format(request);
 		}
+
+		private static string SafeValue(object value) {
+			return value == null ? "" : Convert.ToString(value, CultureInfo.InvariantCulture);
+		}
+
+		private static HttpContent MakeFileMultipart(IEnumerable<IRequestParameter> files) {
+			var content = new MultipartFormDataContent();
+
+			foreach (var file in files) {
+				content.Add(file.GetFileContent(true));
+			}
+
+			return content;
+		}
+
+		public static HttpRequestMessage AsHttpRequestMessage(this IRestRequest request, IRestClient client) {
+			var uri = UriHelper.MakeUri(client.Settings.BaseUri, request);
+
+			var httpRequest = new HttpRequestMessage(request.Method, uri);
+
+			if (request.Method == HttpMethod.Post || 
+				request.Method == HttpMethod.Put) {
+				if (request.HasBody()) {
+					httpRequest.Content = request.Body().GetHttpContent(client);
+				} else if (request.HasFiles()) {
+					var files = request.Files().ToList();
+					if (files.Count > 1) {
+						httpRequest.Content = MakeFileMultipart(request.Files());
+					} else {
+						httpRequest.Content = files[0].GetFileContent(false);
+					}
+				}
+			}
+
+			if (request.HasHeaders()) {
+				foreach (var header in request.Headers()) {
+					httpRequest.Headers.Add(header.Key, SafeValue(header.Value));
+				}
+			}
+
+			return httpRequest;
+		}
+
 	}
 }

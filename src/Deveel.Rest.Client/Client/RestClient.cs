@@ -10,7 +10,7 @@ namespace Deveel.Web.Client {
 			: this(CreateClient(settings), settings) {
 		}
 
-		public RestClient(HttpClient client, IRestClientSettings settings) {
+		public RestClient(IHttpClient client, IRestClientSettings settings) {
 			if (settings == null)
 				throw new ArgumentNullException(nameof(settings));
 			if (client == null)
@@ -24,7 +24,7 @@ namespace Deveel.Web.Client {
 
 			if (settings.DefaultHeaders != null) {
 				foreach (var header in settings.DefaultHeaders) {
-					client.DefaultRequestHeaders.Add(header.Key, (header.Value == null ? "" : header.Value.ToString()));
+					client.AddDefaultHeader(header.Key, header.Value);
 				}
 			}
 
@@ -34,10 +34,10 @@ namespace Deveel.Web.Client {
 
 		public IRestClientSettings Settings { get; }
 
-		protected HttpClient HttpClient { get; }
+		protected IHttpClient HttpClient { get; }
 
-		private static HttpClient CreateClient(IRestClientSettings settings) {
-			return settings.MessageHandler != null ? new HttpClient(settings.MessageHandler, false) : new HttpClient(); 
+		private static IHttpClient CreateClient(IRestClientSettings settings) {
+			return settings.MessageHandler != null ? new DefaultHttpClient(settings.MessageHandler) : new DefaultHttpClient(); 
 		}
 
 		async Task<IRestResponse> IRestClient.RequestAsync(IRestRequest request, CancellationToken cancellationToken) {
