@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
 using System.Net.Http;
-using System.Text;
 
 namespace Deveel.Web.Client {
 	public sealed class RestRequest : IRestRequest {

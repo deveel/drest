@@ -22,7 +22,7 @@ namespace Deveel.Web.Client {
 
 		string[] IContentSerializer.ContentTypes => new[] {"text/xml"};
 
-		public string Serialize(object obj) {
+		public string Serialize(IRestClient client, object obj) {
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
 
@@ -38,7 +38,7 @@ namespace Deveel.Web.Client {
 			}
 		}
 
-		public object Deserialize(Type type, string source) {
+		public object Deserialize(IRestClient client, Type type, string source) {
 			if (type == null)
 				throw new ArgumentNullException(nameof(type));
 

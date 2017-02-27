@@ -11,7 +11,7 @@ namespace Deveel.Web.Client {
 
 		string[] IContentSerializer.ContentTypes => new[] { "application/x-www-form-urlencoded" };
 
-		public string Serialize(object obj) {
+		public string Serialize(IRestClient client, object obj) {
 			if (obj == null)
 				return null;
 			if (obj is string)
@@ -21,20 +21,21 @@ namespace Deveel.Web.Client {
 				.GetTypeInfo()
 				.GetProperties(BindingFlags.Instance | BindingFlags.Public)
 				.ToDictionary(prop => prop.Name, prop => prop.GetValue(obj, null))
-				.Select(x => $"{x.Key}={SafeValue(x.Value)}");
+				.Select(x => $"{x.Key}={SafeValue(client, x.Value)}");
 
 			return String.Join("&", values);
 		}
 
-		private static string SafeValue(object obj) {
+		private static string SafeValue(IRestClient client, object obj) {
 			if (obj == null)
 				return "";
 
-			var s = Convert.ToString(obj, CultureInfo.InvariantCulture);
+			var culture = client.Settings.DefaultCulture ?? CultureInfo.InvariantCulture;
+			var s = Convert.ToString(obj, culture);
 			return WebUtility.UrlEncode(s);
 		}
 
-		public object Deserialize(Type type, string source) {
+		public object Deserialize(IRestClient client, Type type, string source) {
 			if (String.IsNullOrEmpty(source))
 				return null;
 
@@ -53,7 +54,8 @@ namespace Deveel.Web.Client {
 				if (!parts.TryGetValue(prop.Name, out invalue)) {
 					prop.SetValue(obj, null, null);
 				} else {
-					var converted = Convert.ChangeType(invalue, propType, CultureInfo.InvariantCulture);
+					var culture = client.Settings.DefaultCulture ?? CultureInfo.InvariantCulture;
+					var converted = Convert.ChangeType(invalue, propType, culture);
 					prop.SetValue(obj, converted);
 				}
 			}

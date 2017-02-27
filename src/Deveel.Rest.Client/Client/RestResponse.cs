@@ -62,7 +62,7 @@ namespace Deveel.Web.Client {
 			cancellationToken.ThrowIfCancellationRequested();
 
 			var content = await Response.Content.ReadAsStringAsync();
-			return serializer.Deserialize(Request.ReturnedType, content);
+			return serializer.Deserialize(Client, Request.ReturnedType, content);
 		}
 	}
 }

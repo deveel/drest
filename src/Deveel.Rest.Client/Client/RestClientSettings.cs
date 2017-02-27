@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net.Http;
 using System.Reflection;
+using System.Text;
 
 namespace Deveel.Web.Client {
 	public class RestClientSettings : IRestClientSettings {
@@ -16,6 +18,10 @@ namespace Deveel.Web.Client {
 				new KeyValueContentSerializer(),
 				new XmlContentSerializer()
 			};
+
+			ContentTypeProvider = new DefaultContentTypeProvider();
+			ContentEncoding = Encoding.UTF8;
+			DefaultCulture = CultureInfo.InvariantCulture;
 		}
 
 		public Uri BaseUri { get; set; }
@@ -43,5 +49,11 @@ namespace Deveel.Web.Client {
 		public IRequestAuthenticator Authenticator { get; set; }
 
 		public bool AuthenticateRequests { get; set; }
+
+		public IContentTypeProvider ContentTypeProvider { get; set; }
+
+		public Encoding ContentEncoding { get; set; }
+
+		public CultureInfo DefaultCulture { get; set; }
 	}
 }

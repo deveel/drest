@@ -21,12 +21,20 @@ namespace Deveel.Web.Client {
 
 		public JsonSerializerSettings Settings { get; }
 
-		public string Serialize(object obj) {
-			return JsonConvert.SerializeObject(obj, Settings);
+		public string Serialize(IRestClient client, object obj) {
+			var settings = Settings;
+			if (client.Settings.DefaultCulture != null)
+				settings.Culture = client.Settings.DefaultCulture;
+
+			return JsonConvert.SerializeObject(obj, settings);
 		}
 
-		public object Deserialize(Type type, string source) {
-			return JsonConvert.DeserializeObject(source, type, Settings);
+		public object Deserialize(IRestClient client, Type type, string source) {
+			var settings = Settings;
+			if (client.Settings.DefaultCulture != null)
+				settings.Culture = client.Settings.DefaultCulture;
+
+			return JsonConvert.DeserializeObject(source, type, settings);
 		}
 	}
 }

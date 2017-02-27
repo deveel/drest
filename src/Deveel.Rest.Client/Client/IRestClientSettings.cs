@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net.Http;
+using System.Text;
 
 namespace Deveel.Web.Client {
 	public interface IRestClientSettings {
@@ -17,6 +19,12 @@ namespace Deveel.Web.Client {
 		IEnumerable<IRestResponseHandler> ResponseHandlers { get; }
 
 		IRequestAuthenticator Authenticator { get; set; }
+
+		IContentTypeProvider ContentTypeProvider { get; set; }
+
+		Encoding ContentEncoding { get; set; }
+
+		CultureInfo DefaultCulture { get; set; }
 
 		bool AuthenticateRequests { get; set; }
 

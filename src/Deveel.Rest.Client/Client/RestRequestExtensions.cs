@@ -128,18 +128,18 @@ namespace Deveel.Web.Client {
 			return value == null ? "" : Convert.ToString(value, CultureInfo.InvariantCulture);
 		}
 
-		private static HttpContent MakeFileMultipart(IEnumerable<IRequestParameter> files) {
+		private static HttpContent MakeFileMultipart(IRestClient client, IEnumerable<IRequestParameter> files) {
 			var content = new MultipartFormDataContent();
 
 			foreach (var file in files) {
 				var fileName = file.FileName();
-				content.Add(file.GetFileContent(true), file.Name, fileName);
+				content.Add(file.GetFileContent(client, true), file.Name, fileName);
 			}
 
 			return content;
 		}
 
-		public static HttpRequestMessage AsHttpRequestMessage(this IRestRequest request, IRestClient client) {
+		internal static HttpRequestMessage AsHttpRequestMessage(this IRestRequest request, IRestClient client) {
 			var uri = UriHelper.MakeUri(client.Settings.BaseUri, request);
 
 			var httpRequest = new HttpRequestMessage(request.Method, uri);
@@ -153,9 +153,9 @@ namespace Deveel.Web.Client {
 				} else if (request.HasFiles()) {
 					var files = request.Files().ToList();
 					if (files.Count > 1) {
-						content = MakeFileMultipart(request.Files());
+						content = MakeFileMultipart(client, request.Files());
 					} else {
-						content = files[0].GetFileContent(false);
+						content = files[0].GetFileContent(client, false);
 					}
 				}
 

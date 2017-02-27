@@ -6,8 +6,8 @@ namespace Deveel.Web.Client {
 
 		string[] ContentTypes { get; }
 
-		string Serialize(object obj);
+		string Serialize(IRestClient client, object obj);
 
-		object Deserialize(Type type, string source);
+		object Deserialize(IRestClient client, Type type, string source);
 	}
 }
