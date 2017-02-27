@@ -4,7 +4,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 
 namespace Deveel.Web.Client {
-	public class RequestFile : IRequestFile {
+	public class RequestFile : IRequestFile, IDisposable {
 		public RequestFile(string name, string fileName, Stream content) 
 			: this(name, fileName, null, content) {
 		}
@@ -23,6 +23,10 @@ namespace Deveel.Web.Client {
 			ContentType = contentType;
 		}
 
+		~RequestFile() {
+			Dispose(false);
+		}
+
 		RequestParameterType IRequestParameter.Type => RequestParameterType.File;
 
 		public string Name { get; }
@@ -36,6 +40,18 @@ namespace Deveel.Web.Client {
 		public string ContentType { get; set; }
 
 		public int BufferSize { get; set; } = 2048;
+
+		protected virtual void Dispose(bool disposing) {
+			if (disposing) {
+				if (Content != null)
+					Content.Dispose();
+			}
+		}
+
+		public void Dispose() {
+			GC.SuppressFinalize(this);
+			Dispose(true);
+		}
 
 		internal static HttpContent CreateFileContent(IRestClient client, IRequestFile file, bool inMultipart = false) {
 			HttpContent content = new StreamContent(file.Content, file.BufferSize);

@@ -152,15 +152,11 @@ namespace Deveel.Web.Client {
 				MessageHandler = messageHandler,
 				Authenticator = requestAuthenticator,
 				AuthenticateRequests = authenticate ?? requestAuthenticator != null,
-				DefaultFormat = defaultFormat == ContentFormat.Default ? ContentFormat.Json : defaultFormat
+				DefaultFormat = defaultFormat == ContentFormat.Default ? ContentFormat.Json : defaultFormat,
+				DefaultCulture = defaultCulture ?? CultureInfo.InvariantCulture,
+				ContentTypeProvider = contentTypeProvider ?? new DefaultContentTypeProvider(),
+				ContentEncoding = contentEncoding ?? Encoding.UTF8
 			};
-
-			if (contentTypeProvider != null)
-				settings.ContentTypeProvider = contentTypeProvider;
-			if (contentEncoding != null)
-				settings.ContentEncoding = contentEncoding;
-			if (defaultCulture != null)
-				settings.DefaultCulture = defaultCulture;
 
 			AddRequestHandlers(settings, context);
 			AddResponseHandlers(settings, context);

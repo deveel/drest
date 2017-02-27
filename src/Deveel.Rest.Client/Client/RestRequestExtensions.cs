@@ -112,6 +112,13 @@ namespace Deveel.Web.Client {
 			request.AddParameter(new RequestFile(name, fileName, contentType, content));
 		}
 
+		public static void AddFile(this IRestRequest request, Action<IRequestFileBuilder> file) {
+			var builder = new RequestFileBuilder();
+			file(builder);
+
+			request.AddParameter(builder.Build());
+		}
+
 		public static bool HasFile(this IRestRequest request, string key) {
 			return request.HasParameter(RequestParameterType.File, key);
 		}

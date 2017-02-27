@@ -6,8 +6,9 @@ namespace Deveel.Web.Client {
 	public static class RestClientExtensions {
 		public static Task<IRestResponse> RequestAsync(this IRestClient client, Action<IRequestBuilder> builder,
 			CancellationToken cancellationToken = default(CancellationToken)) {
-			var request = RestRequest.Build(builder);
-			return client.RequestAsync(request, cancellationToken);
+			using (var request = RestRequest.Build(builder)) {
+				return client.RequestAsync(request, cancellationToken);
+			}
 		}
 
 		public static async Task<T> RequestAsync<T>(this IRestClient client, RestRequest request, CancellationToken cancellationToken = default(CancellationToken)) {

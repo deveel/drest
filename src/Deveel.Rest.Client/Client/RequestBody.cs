@@ -5,7 +5,7 @@ using System.Net.Http;
 using System.Text;
 
 namespace Deveel.Web.Client {
-	public sealed class RequestBody : IMultipartBody, IBodyPart {
+	public sealed class RequestBody : IMultipartBody, IBodyPart, IDisposable {
 		private IDictionary<string, IBodyPart> parts;
 
 		public RequestBody(string name, object value) 
@@ -30,6 +30,10 @@ namespace Deveel.Web.Client {
 			Format = format;
 		}
 
+		~RequestBody() {
+			Dispose(false);
+		}
+
 		public string Name { get; }
 
 		public IEnumerable<KeyValuePair<string, IBodyPart>> Parts =>
@@ -42,6 +46,22 @@ namespace Deveel.Web.Client {
 		RequestParameterType IRequestParameter.Type => RequestParameterType.Body;
 
 		public object Value { get; }
+
+		private void Dispose(bool disposing) {
+			if (disposing) {
+				if (parts != null) {
+					var disposables = parts.OfType<IDisposable>();
+					foreach (var disposable in disposables) {
+						disposable.Dispose();
+					}
+				}
+			}
+		}
+
+		public void Dispose() {
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
 
 		public void AddPart(IBodyPart part) {
 			if (part == null)
