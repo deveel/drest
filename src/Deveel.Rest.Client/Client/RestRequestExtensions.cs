@@ -175,19 +175,25 @@ namespace Deveel.Web.Client {
 				}
 			}
 
-			if (request.ReturnedType != null) {
-				var contentFormat = request.ReturnedFormat;
-				if (contentFormat == ContentFormat.Default)
-					contentFormat = client.Settings.DefaultFormat;
+			if (request.Returned != null && !request.Returned.IsVoid()) {
+				if (request.Returned.IsFile()) {
+					var contentType = request.Returned.ContentType;
+					if (!String.IsNullOrEmpty(contentType))
+						httpRequest.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse(contentType));
+				} else {
+					var contentFormat = request.Returned.ContentFormat();
+					if (contentFormat == ContentFormat.Default)
+						contentFormat = client.Settings.DefaultFormat;
 
-				var serializer = client.Settings.Serializer(contentFormat);
-				if (serializer == null)
-					throw new InvalidOperationException($"No serializer was configured to handle the format {contentFormat} required.");
+					var serializer = client.Settings.Serializer(contentFormat);
+					if (serializer == null)
+						throw new InvalidOperationException($"No serializer was configured to handle the format {contentFormat} required.");
 
-				var contentTypes = serializer.ContentTypes;
+					var contentTypes = serializer.ContentTypes;
 
-				foreach (var contentType in contentTypes) {
-					httpRequest.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse(contentType));
+					foreach (var contentType in contentTypes) {
+						httpRequest.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse(contentType));
+					}
 				}
 			}
 

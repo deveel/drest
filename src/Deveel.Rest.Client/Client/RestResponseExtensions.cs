@@ -16,5 +16,9 @@ namespace Deveel.Web.Client {
 		public static Task<object> GetBodyAsync(this IRestResponse response) {
 			return response.GetBodyAsync(CancellationToken.None);
 		}
+
+		public static Task<ResponseFile> GetFileAsync(this IRestResponse response) {
+			return response.GetBodyAsync<ResponseFile>();
+		}
 	}
 }

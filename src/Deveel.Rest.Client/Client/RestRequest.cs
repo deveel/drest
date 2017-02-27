@@ -29,7 +29,7 @@ namespace Deveel.Web.Client {
 
 		IEnumerable<IRequestParameter> IRestRequest.Parameters => Parameters;
 
-		public Type ReturnedType { get; set; }
+		public IRequestReturn Returned { get; set; }
 
 		public ContentFormat ReturnedFormat { get; set; }
 

@@ -9,7 +9,7 @@ namespace Deveel.Web.Client {
 		private string resourceName;
 		private List<IRequestParameter> parameters;
 		private bool? authenticate;
-		private Type returnedType;
+		private IRequestReturn returned;
 		private ContentFormat returnedFormat;
 		private IRequestAuthenticator requestAuthenticator;
 
@@ -56,8 +56,8 @@ namespace Deveel.Web.Client {
 			return this;
 		}
 
-		public IRequestBuilder Returns(Type returnType) {
-			returnedType = returnType;
+		public IRequestBuilder Returns(IRequestReturn returns) {
+			returned = returns;
 			return this;
 		}
 
@@ -81,7 +81,7 @@ namespace Deveel.Web.Client {
 			var request = new RestRequest(httpMethod, resourceName) {
 				Authenticate = authenticate,
 				Authenticator = requestAuthenticator,
-				ReturnedType = returnedType
+				Returned = returned
 			};
 
 			var simpleParams = parameters.Where(x => !x.IsBody() && !x.IsFile());

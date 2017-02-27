@@ -12,9 +12,7 @@ namespace Deveel.Web.Client {
 
 		bool? Authenticate { get; }
 
-		ContentFormat ReturnedFormat { get; }
-
-		Type ReturnedType { get; }
+		IRequestReturn Returned { get; }
 
 		IRequestAuthenticator Authenticator { get; }
 	}
