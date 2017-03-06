@@ -11,7 +11,7 @@ namespace Deveel.Web.Client {
 
 		IRequestBuilder Authenticate(bool value = true);
 
-		IRequestBuilder Returns(Type returnType);
+		IRequestBuilder Returns(IRequestReturn returns);
 
 		IRequestBuilder ReturnsFormat(ContentFormat format);
 

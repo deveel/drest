@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 
@@ -140,6 +142,34 @@ namespace Deveel.Web.Client {
 
 		public static IClientSettingsBuilder UseJwtAuthentication(this IClientSettingsBuilder builder, string token) {
 			return builder.UseAuthenticator(new JwtRequestAuthenticator(token));
+		}
+
+		public static IClientSettingsBuilder UseEncoding(this IClientSettingsBuilder builder, string encoding) {
+			return builder.UseEncoding(Encoding.GetEncoding(encoding));
+		}
+
+		public static IClientSettingsBuilder UseUTF8(this IClientSettingsBuilder builder) {
+			return builder.UseEncoding(Encoding.UTF8);
+		}
+
+		public static IClientSettingsBuilder UseASCII(this IClientSettingsBuilder builder) {
+			return builder.UseEncoding(Encoding.ASCII);
+		}
+
+		public static IClientSettingsBuilder UseInvariantCulture(this IClientSettingsBuilder builder) {
+			return builder.UseCulture(CultureInfo.InvariantCulture);
+		}
+
+		public static IClientSettingsBuilder UseDefaultCulture(this IClientSettingsBuilder builder) {
+			return builder.UseInvariantCulture();
+		}
+
+		public static IClientSettingsBuilder UseCurrentCulture(this IClientSettingsBuilder builder) {
+			return builder.UseCulture(CultureInfo.CurrentCulture);
+		}
+
+		public static IClientSettingsBuilder UseCulture(this IClientSettingsBuilder builder, string cultureName) {
+			return builder.UseCulture(new CultureInfo(cultureName));
 		}
 
 		public static IRestClientSettings Build(this IClientSettingsBuilder builder) {

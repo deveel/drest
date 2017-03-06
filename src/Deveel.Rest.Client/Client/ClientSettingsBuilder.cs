@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net.Http;
 using System.Reflection;
+using System.Text;
 
 namespace Deveel.Web.Client {
 	class ClientSettingsBuilder : IClientSettingsBuilder {
@@ -13,7 +15,10 @@ namespace Deveel.Web.Client {
 		private Dictionary<string, object> defaultHeaders;
 		private ContentFormat defaultFormat;
 		private IRequestAuthenticator requestAuthenticator;
+		private IContentTypeProvider contentTypeProvider;
 		private bool? authenticate;
+		private Encoding contentEncoding;
+		private CultureInfo defaultCulture;
 
 		public IClientSettingsBuilder BaseUri(Uri baseUri) {
 			if (baseUri == null)
@@ -120,7 +125,7 @@ namespace Deveel.Web.Client {
 		}
 
 		public IClientSettingsBuilder DefaultToFormat(ContentFormat format) {
-			if (format == Client.ContentFormat.Default)
+			if (format == ContentFormat.Default)
 				throw new ArgumentException("Invalid default format");
 
 			defaultFormat = format;
@@ -147,7 +152,10 @@ namespace Deveel.Web.Client {
 				MessageHandler = messageHandler,
 				Authenticator = requestAuthenticator,
 				AuthenticateRequests = authenticate ?? requestAuthenticator != null,
-				DefaultFormat = defaultFormat == ContentFormat.Default ? ContentFormat.Json : defaultFormat
+				DefaultFormat = defaultFormat == ContentFormat.Default ? ContentFormat.Json : defaultFormat,
+				DefaultCulture = defaultCulture ?? CultureInfo.InvariantCulture,
+				ContentTypeProvider = contentTypeProvider ?? new DefaultContentTypeProvider(),
+				ContentEncoding = contentEncoding ?? Encoding.UTF8
 			};
 
 			AddRequestHandlers(settings, context);
@@ -193,6 +201,21 @@ namespace Deveel.Web.Client {
 					settings.ResponseHandlers.Add(requestHandler);
 				}
 			}
+		}
+
+		public IClientSettingsBuilder UseContentTypeProvider(IContentTypeProvider provider) {
+			contentTypeProvider = provider;
+			return this;
+		}
+
+		public IClientSettingsBuilder UseEncoding(Encoding encoding) {
+			contentEncoding = encoding;
+			return this;
+		}
+
+		public IClientSettingsBuilder UseCulture(CultureInfo culture) {
+			defaultCulture = culture;
+			return this;
 		}
 
 		#region Handler

@@ -101,21 +101,6 @@ namespace Deveel.Web.Client {
 		}
 
 		[Test]
-		public void ClientBuildAndRequest() {
-			var client = RestClient.Build(settings => settings.BaseUri("http://example.com/api").UseDefaultSerializers());
-			var request = RestRequest.Build(builder => builder
-				.Post()
-				.To("foo")
-				.WithJsonBody(new {a = 22, b = "hey"})
-				.Returns<dynamic>());
-
-			var message = request.AsHttpRequestMessage(client);
-
-			Assert.IsNotNull(message);
-			Assert.AreEqual("http://example.com/api/foo", message.RequestUri.ToString());
-		}
-
-		[Test]
 		public void DeleteWithQuery() {
 			var request = RestRequest.Build(builder => builder.Delete().To("user").WithQueryStrings(new {id = 22}));
 

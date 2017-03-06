@@ -112,6 +112,13 @@ namespace Deveel.Web.Client {
 			request.AddParameter(new RequestFile(name, fileName, contentType, content));
 		}
 
+		public static void AddFile(this IRestRequest request, Action<IRequestFileBuilder> file) {
+			var builder = new RequestFileBuilder();
+			file(builder);
+
+			request.AddParameter(builder.Build());
+		}
+
 		public static bool HasFile(this IRestRequest request, string key) {
 			return request.HasParameter(RequestParameterType.File, key);
 		}
@@ -128,18 +135,18 @@ namespace Deveel.Web.Client {
 			return value == null ? "" : Convert.ToString(value, CultureInfo.InvariantCulture);
 		}
 
-		private static HttpContent MakeFileMultipart(IEnumerable<IRequestParameter> files) {
+		private static HttpContent MakeFileMultipart(IRestClient client, IEnumerable<IRequestParameter> files) {
 			var content = new MultipartFormDataContent();
 
 			foreach (var file in files) {
 				var fileName = file.FileName();
-				content.Add(file.GetFileContent(true), file.Name, fileName);
+				content.Add(file.GetFileContent(client, true), file.Name, fileName);
 			}
 
 			return content;
 		}
 
-		public static HttpRequestMessage AsHttpRequestMessage(this IRestRequest request, IRestClient client) {
+		internal static HttpRequestMessage AsHttpRequestMessage(this IRestRequest request, IRestClient client) {
 			var uri = UriHelper.MakeUri(client.Settings.BaseUri, request);
 
 			var httpRequest = new HttpRequestMessage(request.Method, uri);
@@ -153,9 +160,9 @@ namespace Deveel.Web.Client {
 				} else if (request.HasFiles()) {
 					var files = request.Files().ToList();
 					if (files.Count > 1) {
-						content = MakeFileMultipart(request.Files());
+						content = MakeFileMultipart(client, request.Files());
 					} else {
-						content = files[0].GetFileContent(false);
+						content = files[0].GetFileContent(client, false);
 					}
 				}
 
@@ -168,19 +175,25 @@ namespace Deveel.Web.Client {
 				}
 			}
 
-			if (request.ReturnedType != null) {
-				var contentFormat = request.ReturnedFormat;
-				if (contentFormat == ContentFormat.Default)
-					contentFormat = client.Settings.DefaultFormat;
+			if (request.Returned != null && !request.Returned.IsVoid()) {
+				if (request.Returned.IsFile()) {
+					var contentType = request.Returned.ContentType;
+					if (!String.IsNullOrEmpty(contentType))
+						httpRequest.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse(contentType));
+				} else {
+					var contentFormat = request.Returned.ContentFormat();
+					if (contentFormat == ContentFormat.Default)
+						contentFormat = client.Settings.DefaultFormat;
 
-				var serializer = client.Settings.Serializer(contentFormat);
-				if (serializer == null)
-					throw new InvalidOperationException($"No serializer was configured to handle the format {contentFormat} required.");
+					var serializer = client.Settings.Serializer(contentFormat);
+					if (serializer == null)
+						throw new InvalidOperationException($"No serializer was configured to handle the format {contentFormat} required.");
 
-				var contentTypes = serializer.ContentTypes;
+					var contentTypes = serializer.ContentTypes;
 
-				foreach (var contentType in contentTypes) {
-					httpRequest.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse(contentType));
+					foreach (var contentType in contentTypes) {
+						httpRequest.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse(contentType));
+					}
 				}
 			}
 

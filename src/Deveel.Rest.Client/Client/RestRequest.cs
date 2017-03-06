@@ -1,18 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Net.Http;
-using System.Text;
 
 namespace Deveel.Web.Client {
-	public sealed class RestRequest : IRestRequest {
+	public sealed class RestRequest : IRestRequest, IDisposable {
 		public RestRequest(HttpMethod method, string resource) {
 			Method = method;
 			Resource = resource;
 			Parameters = new List<IRequestParameter>();
 
 			ReturnedFormat = ContentFormat.Default;
+		}
+
+		~RestRequest() {
+			Dispose(false);
 		}
 
 		public HttpMethod Method { get; }
@@ -27,9 +29,23 @@ namespace Deveel.Web.Client {
 
 		IEnumerable<IRequestParameter> IRestRequest.Parameters => Parameters;
 
-		public Type ReturnedType { get; set; }
+		public IRequestReturn Returned { get; set; }
 
 		public ContentFormat ReturnedFormat { get; set; }
+
+		private void Dispose(bool disposing) {
+			if (disposing) {
+				var disposables = Parameters.OfType<IDisposable>();
+				foreach (var disposable in disposables) {
+					disposable.Dispose();
+				}
+			}
+		}
+
+		public void Dispose() {
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
 
 		public static RestRequest Get<T>(string resource, object routes = null, object query = null) {
 			return Build(builder => builder

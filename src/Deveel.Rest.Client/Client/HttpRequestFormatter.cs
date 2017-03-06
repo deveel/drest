@@ -31,7 +31,7 @@ namespace Deveel.Web.Client {
 					writer.WriteLine();
 
 					foreach (var header in request.Headers()) {
-						writer.WriteLine($"{header.Key}: {SafeHeaderValue(header.Value)}");
+						writer.WriteLine($"{header.Key}: {SafeHeaderValue(client, header.Value)}");
 					}
 				}
 
@@ -69,8 +69,9 @@ namespace Deveel.Web.Client {
 			}
 		}
 
-		private static string SafeHeaderValue(object value) {
-			return value == null ? "" : Convert.ToString(value, CultureInfo.InvariantCulture);
+		private static string SafeHeaderValue(IRestClient client, object value) {
+			var culture = client.Settings.DefaultCulture ?? CultureInfo.InvariantCulture;
+			return value == null ? "" : Convert.ToString(value, culture);
 		}
 	}
 }

@@ -51,18 +51,27 @@ namespace Deveel.Web.Client {
 		}
 
 		public async Task<object> GetBodyAsync(CancellationToken cancellationToken) {
-			if (Request.ReturnedType == null)
+			if (Request.Returned == null || Request.Returned.IsVoid())
 				throw new InvalidOperationException("The request has no return type: cannot extract the body");
 
-			var contentType = Response.Content.Headers.ContentType.MediaType;
-			var serializer = Client.Settings.Serializers.FirstOrDefault(x => x.ContentTypes.Any(y => String.Equals(y, contentType, StringComparison.OrdinalIgnoreCase)));
-			if (serializer == null)
-				throw new NotSupportedException($"Could not deserialize an result with Content-Type {contentType}");
+			if (Request.Returned.IsFile()) {
+				var content = Response.Content;
+				var contentType = content.Headers.ContentType != null ? content.Headers.ContentType.MediaType : null;
+				return new ResponseFile(() => content.ReadAsStreamAsync(), contentType, content.Headers.ContentLength);
+			} else {
 
-			cancellationToken.ThrowIfCancellationRequested();
+				var contentType = Response.Content.Headers.ContentType.MediaType;
+				var serializer =
+					Client.Settings.Serializers.FirstOrDefault(
+						x => x.ContentTypes.Any(y => String.Equals(y, contentType, StringComparison.OrdinalIgnoreCase)));
+				if (serializer == null)
+					throw new NotSupportedException($"Could not deserialize an result with Content-Type {contentType}");
 
-			var content = await Response.Content.ReadAsStringAsync();
-			return serializer.Deserialize(Request.ReturnedType, content);
+				cancellationToken.ThrowIfCancellationRequested();
+
+				var content = await Response.Content.ReadAsStringAsync();
+				return serializer.Deserialize(Client, Request.Returned.ReturnType, content);
+			}
 		}
 	}
 }

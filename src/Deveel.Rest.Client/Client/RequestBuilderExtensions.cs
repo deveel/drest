@@ -175,8 +175,19 @@ namespace Deveel.Web.Client {
 			return builder.With(file);
 		}
 
+		public static IRequestBuilder WithFile(this IRequestBuilder builder, Action<IRequestFileBuilder> file) {
+			var fileBuilder = new RequestFileBuilder();
+			file(fileBuilder);
+
+			return builder.WithFile(fileBuilder.Build());
+		}
+
 		public static IRequestBuilder Returns<T>(this IRequestBuilder builder) {
-			return builder.Returns(typeof(T));
+			return builder.Returns(RequestReturn.Object(typeof(T)));
+		}
+
+		public static IRequestBuilder Returns(this IRequestBuilder builder, Type returnedType) {
+			return builder.Returns(RequestReturn.Object(returnedType));
 		}
 
 		public static IRequestBuilder ReturnsDefaultFormat(this IRequestBuilder builder) {
@@ -205,6 +216,18 @@ namespace Deveel.Web.Client {
 
 		public static IRequestBuilder ReturnsXml<T>(this IRequestBuilder builder) {
 			return builder.ReturnsXml(typeof(T));
+		}
+
+		public static IRequestBuilder ReturnsFile(this IRequestBuilder builder, string contentType) {
+			return builder.Returns(RequestReturn.File(contentType));
+		}
+
+		public static IRequestBuilder ReturnsFile(this IRequestBuilder builder) {
+			return builder.Returns(RequestReturn.File());
+		}
+
+		public static IRequestBuilder HasNoReturn(this IRequestBuilder builder) {
+			return builder.Returns(RequestReturn.Void);
 		}
 
 		public static IRequestBuilder UseBasicAuthentication(this IRequestBuilder builder, string userName, string password) {

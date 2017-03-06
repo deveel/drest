@@ -4,7 +4,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 
 namespace Deveel.Web.Client {
-	public class RequestFile : IRequestFile {
+	public class RequestFile : IRequestFile, IDisposable {
 		public RequestFile(string name, string fileName, Stream content) 
 			: this(name, fileName, null, content) {
 		}
@@ -23,6 +23,10 @@ namespace Deveel.Web.Client {
 			ContentType = contentType;
 		}
 
+		~RequestFile() {
+			Dispose(false);
+		}
+
 		RequestParameterType IRequestParameter.Type => RequestParameterType.File;
 
 		public string Name { get; }
@@ -37,13 +41,30 @@ namespace Deveel.Web.Client {
 
 		public int BufferSize { get; set; } = 2048;
 
-		internal static HttpContent CreateFileContent(IRequestFile file, bool inMultipart = false) {
+		protected virtual void Dispose(bool disposing) {
+			if (disposing) {
+				if (Content != null)
+					Content.Dispose();
+			}
+		}
+
+		public void Dispose() {
+			GC.SuppressFinalize(this);
+			Dispose(true);
+		}
+
+		internal static HttpContent CreateFileContent(IRestClient client, IRequestFile file, bool inMultipart = false) {
 			HttpContent content = new StreamContent(file.Content, file.BufferSize);
 
 			content.Headers.ContentLength = file.Content.Length;
 
-			if (!String.IsNullOrEmpty(file.ContentType))
+			if (!String.IsNullOrEmpty(file.ContentType)) {
 				content.Headers.ContentType = MediaTypeHeaderValue.Parse(file.ContentType);
+			} else if (client.Settings.ContentTypeProvider != null && !String.IsNullOrEmpty(file.FileName)) {
+				string contentType;
+				if (client.Settings.ContentTypeProvider.TryGetContentType(file.FileName, out contentType))
+					content.Headers.ContentType = MediaTypeHeaderValue.Parse(contentType);
+			}
 
 			if (!inMultipart) {
 				var multipart = new MultipartFormDataContent();
@@ -54,9 +75,9 @@ namespace Deveel.Web.Client {
 			return content;
 		}
 
-		internal static HttpContent CreateFileContent(IRequestParameter parameter, bool inMultipart = false) {
+		internal static HttpContent CreateFileContent(IRestClient client, IRequestParameter parameter, bool inMultipart = false) {
 			if (parameter is IRequestFile)
-				return CreateFileContent((IRequestFile) parameter, inMultipart);
+				return CreateFileContent(client, (IRequestFile) parameter, inMultipart);
 
 			var stream = parameter.Value as Stream;
 			if (stream == null)
@@ -73,8 +94,15 @@ namespace Deveel.Web.Client {
 			return content;
 		}
 
-		internal HttpContent CreateFileContent(bool inMultipart = false) {
-			return CreateFileContent(this, inMultipart);
+		internal HttpContent CreateFileContent(IRestClient client, bool inMultipart = false) {
+			return CreateFileContent(client, this, inMultipart);
+		}
+
+		public static IRequestFile Build(Action<IRequestFileBuilder> file) {
+			var builder = new RequestFileBuilder();
+			file(builder);
+
+			return builder.Build();
 		}
 	}
 }

@@ -36,22 +36,26 @@ namespace Deveel.Web.Client {
 			return RequestBody.CreateContent(parameter, client);
 		}
 
-		internal static HttpContent GetFileContent(this IRequestParameter parameter, bool inMultipart) {
-			return RequestFile.CreateFileContent(parameter, inMultipart);
+		internal static HttpContent GetFileContent(this IRequestParameter parameter, IRestClient client, bool inMultipart) {
+			return RequestFile.CreateFileContent(client, parameter, inMultipart);
 		}
 
 		public static bool IsSimpleValue(this IRequestParameter parameter) {
 			return parameter.Value is string ||
-				   parameter.Value is int ||
-				   parameter.Value is short ||
-				   parameter.Value is long ||
-				   parameter.Value is double ||
-				   parameter.Value is float ||
-				   parameter.Value is decimal ||
-				   parameter.Value is DateTime ||
-				   parameter.Value is DateTimeOffset ||
-				   parameter.Value is TimeSpan ||
-				   parameter.Value is Guid;
+			       parameter.Value is byte ||
+			       parameter.Value is int ||
+			       parameter.Value is short ||
+			       parameter.Value is long ||
+			       parameter.Value is double ||
+			       parameter.Value is float ||
+			       parameter.Value is decimal ||
+			       parameter.Value is uint ||
+			       parameter.Value is ushort ||
+				   parameter.Value is ulong ||
+			       parameter.Value is DateTime ||
+			       parameter.Value is DateTimeOffset ||
+			       parameter.Value is TimeSpan ||
+			       parameter.Value is Guid;
 		}
 
 		internal static StringContent ValueAsString(this IRequestParameter parameter, IRestClient client) {
