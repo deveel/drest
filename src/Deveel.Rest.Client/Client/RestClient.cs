@@ -84,8 +84,14 @@ namespace Deveel.Web.Client {
 			return response;
 		}
 
+		void IRestClient.HandleFailResponse(IRestResponse response) {
+			OnFailResponse(response);
+		}
 
-		protected internal virtual void OnFailResponse(HttpStatusCode statusCode, string reasonPhrase) {
+		protected internal virtual void OnFailResponse(IRestResponse response) {
+			var statusCode = response.StatusCode;
+			var reasonPhrase = response.ReasonPhrase;
+
 			switch (statusCode) {
 				case HttpStatusCode.BadRequest:
 					throw new BadRequestException(reasonPhrase);

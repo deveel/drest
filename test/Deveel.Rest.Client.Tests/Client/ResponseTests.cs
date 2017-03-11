@@ -163,7 +163,7 @@ namespace Deveel.Web.Client {
 				BaseUri = new Uri("http://example.com")
 			});
 
-			Assert.ThrowsAsync<UnauthorizedException>(() => client.RequestAsync<dynamic>(builder => builder.To("foo").Get()));
+			Assert.ThrowsAsync<UnauthorizedException>(() => client.RequestAsync<dynamic>(builder => builder.To("foo").Get().Returns<dynamic>()));
 		}
 	}
 }

@@ -19,5 +19,14 @@ namespace Deveel.Web.Client {
 		public static Task<ResponseFile> GetFileAsync(this IRestResponse response) {
 			return response.GetBodyAsync<ResponseFile>();
 		}
+
+		public static bool IsSuccessful(this IRestResponse response) {
+			return (int) response.StatusCode < 400;
+		}
+
+		public static void AssertSuccessful(this IRestResponse response) {
+			if (!response.IsSuccessful())
+				response.Client.HandleFailResponse(response);
+		}
 	}
 }

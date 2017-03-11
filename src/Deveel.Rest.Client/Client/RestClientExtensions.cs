@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,11 +16,14 @@ namespace Deveel.Web.Client {
 		public static async Task<T> RequestAsync<T>(this IRestClient client, RestRequest request, CancellationToken cancellationToken = default(CancellationToken)) {
 			if (request.Returned == null || request.Returned.ReturnType == null) {
 				request.Returned = new RequestReturn(typeof(T));
+			} else if (!typeof(T).GetTypeInfo().IsAssignableFrom(request.Returned.ReturnType)) {
+				throw new ArgumentException($"The type {request.Returned.ReturnType} set in the request is not assignable to the expected type {typeof(T)}");
 			}
 
 			var response = await client.RequestAsync(request, cancellationToken);
-
-			response.AssertSuccessful();
+			
+			if (!response.IsSuccessful())
+				throw new RestResponseException(response.StatusCode, response.ReasonPhrase);
 
 			return await response.GetBodyAsync<T>(cancellationToken);
 		}

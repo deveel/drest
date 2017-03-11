@@ -14,7 +14,9 @@ namespace Deveel.Web.Client {
 			Response = response;
 		}
 
-		private RestClient Client { get; }
+		public RestClient Client { get; }
+
+		IRestClient IRestResponse.Client => Client;
 
 		public RestRequest Request { get; }
 
@@ -42,12 +44,6 @@ namespace Deveel.Web.Client {
 
 		private string SafeHeader(IEnumerable<string> values) {
 			return values == null ? string.Empty : String.Join(";", values);
-		}
-
-		public void AssertSuccessful() {
-			if ((int) StatusCode >= 400) {
-				Client.OnFailResponse(StatusCode, ReasonPhrase);
-			}
 		}
 
 		public async Task<object> GetBodyAsync(CancellationToken cancellationToken) {

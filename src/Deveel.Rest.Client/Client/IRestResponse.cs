@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 namespace Deveel.Web.Client {
 	public interface IRestResponse {
+		IRestClient Client { get; }
+
 		IRestRequest Request { get; }
 
 		HttpStatusCode StatusCode { get; }
@@ -14,8 +16,6 @@ namespace Deveel.Web.Client {
 
 		IEnumerable<KeyValuePair<string, string>> Headers { get; }
 
-
-		void AssertSuccessful();
 
 		Task<object> GetBodyAsync(CancellationToken cancellationToken);
 	}
