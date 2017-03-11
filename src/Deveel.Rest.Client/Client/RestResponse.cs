@@ -54,13 +54,14 @@ namespace Deveel.Web.Client {
 			if (Request.Returned == null || Request.Returned.IsVoid())
 				throw new InvalidOperationException("The request has no return type: cannot extract the body");
 
+			if (Response.Content == null)
+				return null;
+
 			if (Request.Returned.IsFile()) {
 				var content = Response.Content;
 				var contentType = content.Headers.ContentType != null ? content.Headers.ContentType.MediaType : null;
 				return new ResponseFile(() => content.ReadAsStreamAsync(), contentType, content.Headers.ContentLength);
-			}
-
-			if (Response.Content != null) {
+			} else {
 				var contentType = Response.Content.Headers.ContentType.MediaType;
 				var serializer =
 					Client.Settings.Serializers.FirstOrDefault(
@@ -73,8 +74,6 @@ namespace Deveel.Web.Client {
 				var content = await Response.Content.ReadAsStringAsync();
 				return serializer.Deserialize(Client, Request.Returned.ReturnType, content);
 			}
-
-			return null;
 		}
 	}
 }
