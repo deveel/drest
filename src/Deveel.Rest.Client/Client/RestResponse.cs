@@ -58,8 +58,9 @@ namespace Deveel.Web.Client {
 				var content = Response.Content;
 				var contentType = content.Headers.ContentType != null ? content.Headers.ContentType.MediaType : null;
 				return new ResponseFile(() => content.ReadAsStreamAsync(), contentType, content.Headers.ContentLength);
-			} else {
+			}
 
+			if (Response.Content != null) {
 				var contentType = Response.Content.Headers.ContentType.MediaType;
 				var serializer =
 					Client.Settings.Serializers.FirstOrDefault(
@@ -72,6 +73,8 @@ namespace Deveel.Web.Client {
 				var content = await Response.Content.ReadAsStringAsync();
 				return serializer.Deserialize(Client, Request.Returned.ReturnType, content);
 			}
+
+			return null;
 		}
 	}
 }

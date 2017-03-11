@@ -9,8 +9,7 @@ namespace Deveel.Web.Client {
 		}
 
 		public static async Task<T> GetBodyAsync<T>(this IRestResponse response, CancellationToken cancellationToken) {
-			var body = await response.GetBodyAsync(cancellationToken);
-			return (T) body;
+			return (T) await response.GetBodyAsync(cancellationToken);
 		}
 
 		public static Task<object> GetBodyAsync(this IRestResponse response) {
