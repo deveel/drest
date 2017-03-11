@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -27,6 +28,26 @@ namespace Deveel.Web.Client {
 		public static void AssertSuccessful(this IRestResponse response) {
 			if (!response.IsSuccessful())
 				response.Client.HandleFailResponse(response);
+		}
+
+		public static RestResponseException GetException(this IRestResponse response) {
+			if (response.IsSuccessful())
+				return null;
+
+			switch (response.StatusCode) {
+				case HttpStatusCode.Unauthorized:
+					return new UnauthorizedException(response.ReasonPhrase);
+				case HttpStatusCode.Conflict:
+					return new ConflictException(response.ReasonPhrase);
+				case HttpStatusCode.Forbidden:
+					return new ForbiddenException(response.ReasonPhrase);
+				case HttpStatusCode.BadRequest:
+					return new BadRequestException(response.ReasonPhrase);
+				case HttpStatusCode.NotFound:
+					return new NotFoundException(response.ReasonPhrase);
+				default:
+					return new RestResponseException(response.StatusCode, response.ReasonPhrase);
+			}
 		}
 	}
 }

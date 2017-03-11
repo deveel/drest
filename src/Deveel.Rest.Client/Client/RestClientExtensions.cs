@@ -22,8 +22,9 @@ namespace Deveel.Web.Client {
 
 			var response = await client.RequestAsync(request, cancellationToken);
 			
+			response.AssertSuccessful();
 			if (!response.IsSuccessful())
-				throw new RestResponseException(response.StatusCode, response.ReasonPhrase);
+				throw response.GetException();
 
 			return await response.GetBodyAsync<T>(cancellationToken);
 		}

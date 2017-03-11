@@ -89,23 +89,7 @@ namespace Deveel.Web.Client {
 		}
 
 		protected internal virtual void OnFailResponse(IRestResponse response) {
-			var statusCode = response.StatusCode;
-			var reasonPhrase = response.ReasonPhrase;
-
-			switch (statusCode) {
-				case HttpStatusCode.BadRequest:
-					throw new BadRequestException(reasonPhrase);
-				case HttpStatusCode.Conflict:
-					throw new ConflictException(reasonPhrase);
-				case HttpStatusCode.Forbidden:
-					throw new ForbiddenException(reasonPhrase);
-				case HttpStatusCode.NotFound:
-					throw new NotFoundException(reasonPhrase);
-				case HttpStatusCode.Unauthorized:
-					throw new UnauthorizedException(reasonPhrase);
-				default:
-					throw new RestResponseException(statusCode, reasonPhrase);
-			}
+			throw response.GetException();
 		}
 
 		public static RestClient Build(Action<IClientSettingsBuilder> builder) {
