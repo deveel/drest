@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Deveel.Web.Client {
 	public static class RestClientExtensions {
-		public static Task<IRestResponse> RequestAsync(this IRestClient client, Action<IRequestBuilder> builder,
+		public static Task<IRestResponse> RequestAsync(this IRestClient client, Action<IRequestBuilder> builder, 
 			CancellationToken cancellationToken = default(CancellationToken)) {
 			using (var request = RestRequest.Build(builder)) {
 				return client.RequestAsync(request, cancellationToken);
@@ -12,11 +13,22 @@ namespace Deveel.Web.Client {
 		}
 
 		public static async Task<T> RequestAsync<T>(this IRestClient client, RestRequest request, CancellationToken cancellationToken = default(CancellationToken)) {
+			if (request.Returned == null || request.Returned.ReturnType == null) {
+				request.Returned = new RequestReturn(typeof(T));
+			}
+
 			var response = await client.RequestAsync(request, cancellationToken);
 
 			response.AssertSuccessful();
 
 			return await response.GetBodyAsync<T>(cancellationToken);
+		}
+
+		public static Task<T> RequestAsync<T>(this IRestClient client, Action<IRequestBuilder> builder,
+			CancellationToken cancellationToken = default(CancellationToken)) {
+			using (var request = RestRequest.Build(builder)) {
+				return client.RequestAsync<T>(request, cancellationToken);
+			}
 		}
 
 		public static Task<T> GetAsync<T>(this IRestClient client, string resource) {

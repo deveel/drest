@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -145,6 +143,27 @@ namespace Deveel.Web.Client {
 			Assert.IsNotNull(response);
 			Assert.DoesNotThrow(() => response.AssertSuccessful());
 			Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+		}
+
+		[Test]
+		public void UnauthorizedOnTypedResponse() {
+			var httpClient = new Mock<IHttpClient>()
+				.SetupAllProperties();
+			httpClient.Setup(x =>
+						x.SendAsync(It.Is<HttpRequestMessage>(message => message.RequestUri.ToString() == "http://example.com/foo"),
+							CancellationToken.None))
+				.Returns((HttpRequestMessage message, CancellationToken token) => {
+					var httpResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized) {
+						RequestMessage = message
+					};
+					return Task.FromResult(httpResponse);
+				});
+
+			var client = new RestClient(httpClient.Object, new RestClientSettings {
+				BaseUri = new Uri("http://example.com")
+			});
+
+			Assert.ThrowsAsync<UnauthorizedException>(() => client.RequestAsync<dynamic>(builder => builder.To("foo").Get()));
 		}
 	}
 }
